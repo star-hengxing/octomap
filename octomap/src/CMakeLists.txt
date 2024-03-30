@@ -11,14 +11,11 @@ SET (octomap_SRCS
   )
 
 # dynamic and static libs, see CMake FAQ:
-ADD_LIBRARY( octomap SHARED ${octomap_SRCS})
+ADD_LIBRARY( octomap ${octomap_SRCS})
 set_target_properties( octomap PROPERTIES
   VERSION ${OCTOMAP_VERSION}
   SOVERSION ${OCTOMAP_SOVERSION}
 )
-ADD_LIBRARY( octomap-static STATIC ${octomap_SRCS})
-SET_TARGET_PROPERTIES(octomap-static PROPERTIES OUTPUT_NAME "octomap") 
-add_dependencies(octomap-static octomath-static)
 
 TARGET_LINK_LIBRARIES(octomap octomath)
 
@@ -26,10 +23,12 @@ if(NOT EXISTS "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/cmake/octomap")
   file(MAKE_DIRECTORY "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/cmake/octomap")
 endif()
 
-export(TARGETS octomap octomap-static
+export(TARGETS octomap
   APPEND FILE "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/cmake/octomap/octomap-targets.cmake")
 
-ADD_SUBDIRECTORY( testing )
+if (ENABLE_TESTING)
+  ADD_SUBDIRECTORY( testing )
+endif()
 
 ADD_EXECUTABLE(graph2tree graph2tree.cpp)
 TARGET_LINK_LIBRARIES(graph2tree octomap)
@@ -67,7 +66,7 @@ TARGET_LINK_LIBRARIES(intersection_example octomap)
 ADD_EXECUTABLE(octree2pointcloud octree2pointcloud.cpp)
 TARGET_LINK_LIBRARIES(octree2pointcloud octomap)
 
-install(TARGETS octomap octomap-static
+install(TARGETS octomap
   EXPORT octomap-targets
   INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
   ${INSTALL_TARGETS_DEFAULT_ARGS}
